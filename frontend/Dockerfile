@@ -2,33 +2,32 @@ FROM node:16-slim AS builder
 
 WORKDIR /app
 
-# 复制package.json和package-lock.json
-COPY package*.json ./
+# 安装构建依赖
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHON=/usr/bin/python3
 
 # 安装依赖
+COPY package*.json ./
 RUN npm install
 
-# 复制源代码
-COPY . .
-
 # 构建应用
+COPY . .
 RUN npm run build
 
 # 生产环境
 FROM node:16-slim AS runner
-
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-# 复制构建产物和必要文件
-COPY --from=builder /app/next.config.js ./
+# 复制构建产物（注意这里改为 .next）
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/package*.json ./
 
-# 暴露端口
-EXPOSE 3000
+RUN npm install --production
 
-# 启动命令
-CMD ["node", "server.js"] 
+CMD ["npm", "start"]

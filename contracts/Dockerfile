@@ -1,4 +1,4 @@
-FROM node:16-slim
+FROM node:18-slim
 
 WORKDIR /app
 
@@ -8,20 +8,10 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制package.json和package-lock.json
 COPY package*.json ./
-
-# 安装依赖
 RUN npm install
 
-# 复制合约代码
 COPY . .
-
-# 编译合约
 RUN npx hardhat compile
 
-# 设置环境变量
-ENV NODE_ENV=development
-
-# 启动命令
-CMD ["npx", "hardhat", "node"] 
+CMD ["npx", "hardhat", "node"]

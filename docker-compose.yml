@@ -1,23 +1,8 @@
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://backend:8000
-      - REACT_APP_WEB3_PROVIDER=http://ganache:8545
-    depends_on:
-      - backend
-      - ganache
-
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     ports:
       - "8000:8000"
     environment:
@@ -47,4 +32,4 @@ services:
 
 volumes:
   sqlite_data:
-  ganache_data: 
+  ganache_data:
