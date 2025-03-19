@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://backend:8000
+      - REACT_APP_WEB3_PROVIDER=http://ganache:8545
+    depends_on:
+      - backend
+      - ganache
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ETH_NODE_URL=http://ganache:8545
+      - DATABASE_URL=sqlite:///./lendflow.db
+    volumes:
+      - sqlite_data:/app/data
+    depends_on:
+      - ganache
+
+  ganache:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "8545:8545"
+    command: ["--deterministic", "--accounts=10", "--defaultBalanceEther=1000"]
+    volumes:
+      - ganache_data:/data
+
+  contracts:
+    build:
+      context: ./contracts
+      dockerfile: Dockerfile
+    volumes:
+      - ./contracts:/app
+    depends_on:
+      - ganache
+
+volumes:
+  sqlite_data:
+  ganache_data: 
